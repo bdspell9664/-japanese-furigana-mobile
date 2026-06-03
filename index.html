@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="阅读助手">
+<meta name="theme-color" content="#d43d3d">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<title>日文阅读助手</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ═══ Header ═══ -->
+<header class="app-header">
+  <div class="app-title">日文閱讀<span>by DeepSeek</span></div>
+  <div class="header-actions">
+    <button class="header-btn" id="btnDark" title="深色主题">🌙</button>
+    <button class="header-btn" id="btnSettings" title="设置">⚙️</button>
+  </div>
+</header>
+
+<!-- ═══ Tab Bar ═══ -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-idx="0">📖 阅读</button>
+  <button class="tab-btn" data-idx="1">🔬 分析</button>
+  <button class="tab-btn" data-idx="2">⭐ 收藏</button>
+</nav>
+
+<!-- ═══ Main Content ═══ -->
+<main class="main-content">
+
+  <!-- ── Tab 0: Reading ── -->
+  <div class="tab-panel active" id="readingPanel">
+    <div class="input-area">
+      <textarea id="textInput" placeholder="在此输入或粘贴日文文本..."></textarea>
+      <div class="url-row">
+        <input type="url" id="urlInput" placeholder="或输入日文新闻网址…" autocomplete="off">
+        <button class="btn btn-secondary btn-small" id="btnFetch">🔗 获取</button>
+      </div>
+      <div class="input-actions">
+        <button class="btn btn-primary" id="btnAnnotate">🔍 解析</button>
+        <button class="btn btn-secondary btn-small" id="btnPaste">📋 粘贴</button>
+        <div class="jlpt-row">
+          <span style="font-size:11px;color:var(--text3)">JLPT:</span>
+          <span id="jlptLabel" style="font-size:11px;font-weight:700;color:var(--accent);min-width:24px">N3</span>
+          <input type="range" class="jlpt-slider" id="jlptSlider" min="1" max="5" value="3" step="1">
+        </div>
+      </div>
+    </div>
+    <div class="reading-view" id="readingView"></div>
+  </div>
+
+  <!-- ── Tab 1: Analysis ── -->
+  <div class="tab-panel" id="analysisPanel">
+    <div class="reading-view" id="analysisView">
+      <div class="ana-empty">解析完成后自动显示深度分析</div>
+    </div>
+  </div>
+
+  <!-- ── Tab 2: Saved ── -->
+  <div class="tab-panel" id="savedPanel">
+    <div id="savedView" class="saved-empty">还没有收藏的单词</div>
+  </div>
+
+</main>
+
+<!-- ═══ Word Detail Sheet ═══ -->
+<div class="sheet-overlay" id="sheetOverlay"></div>
+<div class="word-sheet" id="wordSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-word" id="sheetWord"></div>
+  <div class="sheet-reading" id="sheetReading"></div>
+  <div class="sheet-tags" id="sheetTags"></div>
+  <div class="sheet-def" id="sheetDef"></div>
+  <div class="sheet-grammar-note" id="sheetGNote" style="display:none"></div>
+  <div class="sheet-ex" id="sheetEx"></div>
+  <div class="sheet-actions">
+    <button class="btn btn-primary" id="btnSaveWord">☆ 收藏</button>
+  </div>
+</div>
+
+<!-- ═══ Settings Panel ═══ -->
+<div class="settings-overlay" id="settingsOverlay"></div>
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <h3>设置</h3>
+    <button class="header-btn" id="settingsClose">✕</button>
+  </div>
+  <div class="settings-body">
+    <div class="field">
+      <label>DeepSeek API Key</label>
+      <input type="password" id="settingsApiKey" placeholder="sk-..." autocomplete="off">
+    </div>
+    <div class="field">
+      <label>JLPT 级别：<span id="settingsJlptVal" style="color:var(--accent)">N3</span></label>
+      <input type="range" id="settingsJlpt" min="1" max="5" value="3" step="1" style="width:100%">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
+        <span>N1</span><span>N2</span><span>N3</span><span>N4</span><span>N5</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>标注层</label>
+      <div class="layer-toggles">
+        <div class="layer-row"><span>假名 (Furigana)</span><label class="toggle"><input type="checkbox" id="lyrFurigana" checked><span class="track"></span></label></div>
+        <div class="layer-row"><span>罗马音 (Rōmaji)</span><label class="toggle"><input type="checkbox" id="lyrRomaji"><span class="track"></span></label></div>
+        <div class="layer-row"><span>词性 (POS)</span><label class="toggle"><input type="checkbox" id="lyrPos" checked><span class="track"></span></label></div>
+        <div class="layer-row"><span>动词分类 (Verb)</span><label class="toggle"><input type="checkbox" id="lyrVerb"><span class="track"></span></label></div>
+        <div class="layer-row"><span>词源 (Etymology)</span><label class="toggle"><input type="checkbox" id="lyrEtym"><span class="track"></span></label></div>
+        <div class="layer-row"><span>文法角色 (Grammar)</span><label class="toggle"><input type="checkbox" id="lyrGrammar" checked><span class="track"></span></label></div>
+        <div class="layer-row"><span>句子分段 (Segments)</span><label class="toggle"><input type="checkbox" id="lyrSegments" checked><span class="track"></span></label></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Toast ═══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ Scripts ═══ -->
+<script src="js/api.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

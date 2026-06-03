@@ -188,9 +188,6 @@ async function doAnnotate() {
   }
 }
 
-// Helper ESC for error messages
-function ESC(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
-
 // ── Article fetching (CORS proxy + text extraction) ────────────────────────
 
 const CORS_PROXIES = [

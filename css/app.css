@@ -126,8 +126,9 @@ body.dark{
   white-space:pre-wrap;word-break:break-all;
 }
 .reading-view:empty::after{
-  content:'输入日文文本并点击"解析"开始阅读...';
-  color:var(--text3);font-size:14px;pointer-events:none;
+  content:'输入日文文本，或粘贴网址获取新闻，点击"解析"开始阅读...';
+  color:var(--text3);font-size:13px;pointer-events:none;
+  display:block;padding:40px 0;text-align:center;line-height:1.8;
 }
 
 /* ── Rendered word (rw-word) ──────────────────────────────────────────────── */
@@ -230,7 +231,16 @@ body.dark .ana-trans{background:#1a3a2a;border-color:#2d5a3d}
 .saved-card{
   padding:14px;background:var(--bg2);border-radius:var(--radius-sm);
   border:1px solid var(--border);cursor:pointer;transition:all .15s;
+  position:relative;
 }
+.saved-card:active{transform:scale(.98)}
+.saved-del{
+  position:absolute;top:6px;right:8px;width:22px;height:22px;
+  border:none;background:var(--bg3);color:var(--text3);border-radius:50%;
+  font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .2s;
+}
+.saved-card:hover .saved-del,.saved-card:active .saved-del{opacity:1}
 .saved-card:active{transform:scale(.98)}
 .saved-card .sw{font-size:18px;font-weight:700}
 .saved-card .sr{font-size:12px;color:var(--text3);margin-bottom:4px}

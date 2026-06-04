@@ -7,7 +7,6 @@
 
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
-const Q = sel => document.querySelector(sel);
 const QA = sel => document.querySelectorAll(sel);
 
 const dom = {
@@ -176,7 +175,7 @@ async function doAnnotate() {
     toast(`已标注 ${wordCount} 个词`);
 
     // Auto-run deep analysis
-    if (text.length <= 500) {
+    if (text.length <= 800) {
       doAnalyze(text).catch(()=>{});
     }
   } catch (e) {
@@ -311,6 +310,7 @@ function openSheet(word, reading, pos, grammar, def, example, gnote, baseForm) {
 }
 
 function updateSheet(pos, def, example, gnote, baseForm) {
+  if (!state._currentWord) return;
   if (pos && !state._currentWord.pos) {
     dom.sheetTags.innerHTML = `<span class="sheet-tag pos">${pos}</span>` + dom.sheetTags.innerHTML;
   }
@@ -336,7 +336,17 @@ function getGrammarColor(role) {
   return map[role] || '#888';
 }
 
+// ── Sheet: tap overlay or swipe down to close ──────────────────────────
 dom.sheetOverlay.addEventListener('click', closeSheet);
+
+let sheetStartY = 0;
+dom.wordSheet.addEventListener('touchstart', e => {
+  sheetStartY = e.touches[0].clientY;
+}, {passive: true});
+dom.wordSheet.addEventListener('touchmove', e => {
+  const dy = e.touches[0].clientY - sheetStartY;
+  if (dy > 80) { closeSheet(); }
+}, {passive: true});
 dom.btnSaveWord.addEventListener('click', () => {
   const w = state._currentWord;
   if (!w || dom.btnSaveWord.classList.contains('saved')) return;
@@ -382,6 +392,7 @@ function renderSavedWords() {
   dom.savedView.innerHTML = '<div class="saved-list">' +
     state.savedWords.map(w => `
       <div class="saved-card" data-id="${w.id}">
+        <button class="saved-del" data-id="${w.id}" title="删除">✕</button>
         <div class="sw">${ESC(w.surface)}</div>
         <div class="sr">${ESC(w.reading||'')} · ${ESC(w.pos||'')}</div>
         <div class="sd">${ESC(w.definition||'')}</div>
@@ -390,10 +401,23 @@ function renderSavedWords() {
 
   // Tap to show detail
   dom.savedView.querySelectorAll('.saved-card').forEach(card => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('saved-del')) return;
       const id = card.dataset.id;
       const w = state.savedWords.find(s => s.id === id);
       if (w) openSheet(w.surface, w.reading, w.pos, w.grammar_note, w.definition, w.example||'', w.grammar_note||'', '');
+    });
+  });
+
+  // Delete button
+  dom.savedView.querySelectorAll('.saved-del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      state.savedWords = state.savedWords.filter(s => s.id !== id);
+      saveSavedWords();
+      renderSavedWords();
+      toast('已删除');
     });
   });
 }
@@ -434,6 +458,10 @@ dom.settingsJlpt.addEventListener('input', () => {
 dom.jlptSlider.addEventListener('input', () => {
   state.jlptLevel = parseInt(dom.jlptSlider.value);
   dom.jlptLabel.textContent = `N${6 - state.jlptLevel}`;
+  // Sync settings panel slider
+  dom.settingsJlpt.value = state.jlptLevel;
+  dom.settingsJlptVal.textContent = dom.jlptLabel.textContent;
+  saveState();
 });
 
 // ── Dark theme ──────────────────────────────────────────────────────────────
@@ -489,6 +517,11 @@ dom.btnFetch.addEventListener('click', async () => {
 
 // ── Annotate trigger ────────────────────────────────────────────────────────
 dom.btnAnnotate.addEventListener('click', doAnnotate);
+
+// ── Enter key on URL input → trigger fetch ─────────────────────────────────
+dom.urlInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); dom.btnFetch.click(); }
+});
 
 // ── Init ────────────────────────────────────────────────────────────────────
 function init() {

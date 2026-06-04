@@ -163,6 +163,7 @@ body.dark .sheet-grammar-note{background:#2a2040;color:#a78bfa}
 .card-word{font-size:32px;font-weight:800;letter-spacing:2px;color:var(--text)}
 .card-reading{font-size:16px;color:var(--text3);margin-top:8px}
 .card-pos{font-size:13px;font-weight:700;color:var(--accent);margin-top:10px}
+.card-conj{font-size:12px;color:var(--text2);margin-top:4px;padding:2px 10px;background:var(--bg3);border-radius:10px;display:inline-block}
 .card-def{font-size:16px;color:var(--text);margin-top:10px;line-height:1.7}
 .card-ex{font-size:12px;color:var(--text2);margin-top:10px;font-style:italic}
 .card-speak{font-size:14px;margin-top:10px}

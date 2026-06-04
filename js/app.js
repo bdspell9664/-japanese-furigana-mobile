@@ -26,6 +26,7 @@ const dom={};
     'reviewSetup','reviewListSelect','reviewStats','btnStartReview',
     'flashcard','cardFront','cardBack','cardWord','cardReading',
     'cardBackWord','cardBackReading','cardPos','cardDef','cardEx',
+    'cardConj',
     'cardActions','reviewProgress','btnEndReview',
     // Sheet
     'sheetOverlay','wordSheet','sheetWord','sheetReading','sheetTags','sheetDef','sheetEx',
@@ -268,6 +269,7 @@ function bindWordTaps(){
 
 async function doAnalyze(text){
   if(!text||!state.apiKey)return;
+  dom.analysisView.innerHTML='<div class="ana-empty">AI 分析中…</div>';
   try{const r=await JRApi.analyze(text,state.apiKey);state.analysis=r;dom.analysisView.innerHTML=Renderer.buildAnalysis(text,r)}
   catch(e){dom.analysisView.innerHTML=`<div class="ana-empty">分析失败：${ESC(e.message)}</div>`}
 }
@@ -391,7 +393,7 @@ function renderSavedWords(){
     <div class="saved-card" data-id="${w.id}">
       <button class="saved-del" data-id="${w.id}">✕</button>
       <div class="sw">${ESC(w.surface)}</div>
-      <div class="sr">${ESC(w.reading||'')} · ${ESC(w.pos||'')}</div>
+      <div class="sr">${ESC(w.reading||'')} · ${ESC(w.pos||'')}${w.conjugation?` · ${ESC(w.conjugation)}`:''}</div>
       <div class="sd">${ESC(w.definition||'')}</div>
     </div>
   `).join('')+'</div>';
@@ -442,7 +444,8 @@ function showCard(){
   const w=state.reviewQueue[state.reviewIdx];if(!w){endReview();return}
   dom.cardWord.textContent=w.surface;dom.cardReading.textContent=w.reading||'';
   dom.cardBackWord.textContent=w.surface;dom.cardBackReading.textContent=w.reading||'';
-  dom.cardPos.textContent=w.pos||'';dom.cardDef.textContent=w.definition||'';
+  dom.cardPos.textContent=w.pos||'';dom.cardConj.textContent=w.conjugation||w.grammar_note||'';
+  dom.cardDef.textContent=w.definition||'';
   dom.cardEx.textContent=w.example||'';
   dom.cardFront.style.display='';dom.cardBack.style.display='none';dom.cardActions.style.display='none';
   dom.reviewProgress.textContent=`${state.reviewIdx+1} / ${state.reviewQueue.length}`;
@@ -543,8 +546,18 @@ dom.discoverSearch.addEventListener('input',()=>{
     dom.feedList.querySelectorAll('.article-card').forEach(c=>c.addEventListener('click',()=>{
       dom.textInput.value='「'+q+'」';dom.btnAnnotate.click();switchTab(1);
     }));
+  }else if(q.length>=1){
+    dom.feedList.innerHTML=`<div class="feed-header" style="margin-top:8px"><span class="feed-title">🔎 发起AI解析</span></div>
+      <div class="article-card" data-search="${ESC(q)}">
+        <div class="art-title">以「${ESC(q)}」为中心搜索日文词汇分析</div>
+        <div class="art-desc">点击将使用 DeepSeek AI 分析「${ESC(q)}」的用法、释义、语法角色</div>
+        <div class="art-meta"><span class="art-tag">AI</span></div>
+      </div>`;
+    dom.feedList.querySelectorAll('.article-card').forEach(c=>c.addEventListener('click',()=>{
+      dom.textInput.value=c.dataset.search||q;dom.btnAnnotate.click();switchTab(1);
+    }));
   }else{
-    dom.feedList.innerHTML='<div class="feed-loading">未找到匹配词，点搜索发起AI查询</div>';
+    dom.feedList.innerHTML='<div class="feed-loading">输入单词搜索收藏或发起AI查询</div>';
   }
 });
 

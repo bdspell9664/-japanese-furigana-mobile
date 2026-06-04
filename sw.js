@@ -1,4 +1,4 @@
-const CACHE = 'jra-v4';
+const CACHE = 'jra-v5';
 const URLS = [
   './', './index.html', './manifest.json',
   './css/app.css', './js/app.js', './js/api.js', './js/renderer.js'

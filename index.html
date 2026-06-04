@@ -23,18 +23,46 @@
   </div>
 </header>
 
-<!-- ═══ Tab Bar ═══ -->
+<!-- ═══ Tab Bar (5 tabs, 发现 is default landing) ═══ -->
 <nav class="tab-bar">
-  <button class="tab-btn active" data-idx="0">📖 阅读</button>
-  <button class="tab-btn" data-idx="1">🔬 分析</button>
-  <button class="tab-btn" data-idx="2">⭐ 收藏</button>
+  <button class="tab-btn active" data-idx="0">🔍 发现</button>
+  <button class="tab-btn" data-idx="1">📖 阅读</button>
+  <button class="tab-btn" data-idx="2">🔬 分析</button>
+  <button class="tab-btn" data-idx="3">⭐ 收藏</button>
+  <button class="tab-btn" data-idx="4">🃏 复习</button>
 </nav>
 
 <!-- ═══ Main Content ═══ -->
 <main class="main-content">
 
-  <!-- ── Tab 0: Reading ── -->
-  <div class="tab-panel active" id="readingPanel">
+  <!-- ── Tab 0: Discover / Homepage ── -->
+  <div class="tab-panel active" id="discoverPanel">
+    <!-- Search bar -->
+    <div class="discover-search">
+      <input type="text" id="discoverSearch" placeholder="搜索单词…" autocomplete="off">
+    </div>
+    <!-- NHK News feed -->
+    <div class="feed-section" id="nhkFeed">
+      <div class="feed-header">
+        <span class="feed-title">📰 NHK News Web Easy</span>
+        <button class="btn-ghost btn-small" id="btnRefreshFeed">刷新</button>
+      </div>
+      <div class="feed-list" id="feedList">
+        <div class="feed-loading">加载中…</div>
+      </div>
+    </div>
+    <!-- Word Lists overview -->
+    <div class="feed-section">
+      <div class="feed-header">
+        <span class="feed-title">📚 我的词单</span>
+        <button class="btn-ghost btn-small" id="btnNewList">+ 新建</button>
+      </div>
+      <div class="list-overview" id="listOverview"></div>
+    </div>
+  </div>
+
+  <!-- ── Tab 1: Reading ── -->
+  <div class="tab-panel" id="readingPanel">
     <div class="input-area">
       <textarea id="textInput" placeholder="在此输入或粘贴日文文本..."></textarea>
       <div class="url-row">
@@ -44,29 +72,65 @@
       <div class="input-actions">
         <button class="btn btn-primary" id="btnAnnotate">🔍 解析</button>
         <button class="btn btn-secondary btn-small" id="btnPaste">📋 粘贴</button>
+        <button class="btn btn-ghost btn-small" id="btnSpeakAll" title="朗读全文">🔊 朗读</button>
         <div class="jlpt-row">
           <span style="font-size:11px;color:var(--text3)">JLPT:</span>
           <span id="jlptLabel" style="font-size:11px;font-weight:700;color:var(--accent);min-width:24px">N3</span>
           <input type="range" class="jlpt-slider" id="jlptSlider" min="1" max="5" value="3" step="1">
-          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);position:absolute;left:0;right:0;bottom:-14px">
-            <span>N5</span><span>N4</span><span>N3</span><span>N2</span><span>N1</span>
-          </div>
         </div>
       </div>
     </div>
     <div class="reading-view" id="readingView"></div>
   </div>
 
-  <!-- ── Tab 1: Analysis ── -->
+  <!-- ── Tab 2: Analysis ── -->
   <div class="tab-panel" id="analysisPanel">
     <div class="reading-view" id="analysisView">
-      <div class="ana-empty">深度语法分析<br><span style="font-size:12px;color:var(--text3)">标注后自动显示（500字以内）</span></div>
+      <div class="ana-empty">深度语法分析<br><span style="font-size:12px;color:var(--text3)">标注后自动显示（800字以内）</span></div>
     </div>
   </div>
 
-  <!-- ── Tab 2: Saved ── -->
+  <!-- ── Tab 3: Saved / Word Lists ── -->
   <div class="tab-panel" id="savedPanel">
+    <div class="list-nav">
+      <select id="listSelector" class="list-select"></select>
+      <button class="btn-ghost btn-small" id="btnRenameList">重命名</button>
+      <button class="btn-ghost btn-small" id="btnDeleteList">删除</button>
+    </div>
     <div id="savedView" class="saved-empty">还没有收藏的单词</div>
+  </div>
+
+  <!-- ── Tab 4: Flashcards ── -->
+  <div class="tab-panel" id="reviewPanel">
+    <div class="review-setup" id="reviewSetup">
+      <div style="margin-bottom:10px;font-size:13px;color:var(--text2)">选择复习词单：</div>
+      <select id="reviewListSelect" class="list-select" style="margin-bottom:10px"></select>
+      <div style="margin-bottom:10px;font-size:11px;color:var(--text3)" id="reviewStats"></div>
+      <button class="btn btn-primary" id="btnStartReview">开始复习</button>
+    </div>
+    <div class="flashcard" id="flashcard" style="display:none">
+      <div class="card-face card-front" id="cardFront">
+        <div class="card-word" id="cardWord"></div>
+        <div class="card-reading" id="cardReading"></div>
+      </div>
+      <div class="card-face card-back" id="cardBack" style="display:none">
+        <div class="card-word" id="cardBackWord"></div>
+        <div class="card-reading" id="cardBackReading"></div>
+        <div class="card-pos" id="cardPos"></div>
+        <div class="card-def" id="cardDef"></div>
+        <div class="card-ex" id="cardEx"></div>
+        <button class="btn btn-ghost btn-small card-speak">🔊</button>
+      </div>
+      <div class="card-actions" id="cardActions" style="display:none">
+        <button class="btn btn-secondary btn-rate" data-rating="1">难 😰</button>
+        <button class="btn btn-secondary btn-rate" data-rating="2">一般 🤔</button>
+        <button class="btn btn-primary btn-rate" data-rating="3">简单 😊</button>
+      </div>
+      <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text3)">
+        点击卡片翻转 · <span id="reviewProgress"></span>
+        <button class="btn-ghost btn-small" id="btnEndReview">结束</button>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -81,8 +145,10 @@
   <div class="sheet-def" id="sheetDef"></div>
   <div class="sheet-grammar-note" id="sheetGNote" style="display:none"></div>
   <div class="sheet-ex" id="sheetEx"></div>
-  <div class="sheet-actions">
+  <div class="sheet-actions" style="display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn btn-primary" id="btnSaveWord">☆ 收藏</button>
+    <select id="sheetListSelect" class="list-select" style="flex:1;min-width:0;font-size:11px;padding:8px"></select>
+    <button class="btn btn-ghost btn-small" id="btnSheetSpeak">🔊</button>
   </div>
 </div>
 
@@ -102,19 +168,19 @@
       <label>JLPT 级别：<span id="settingsJlptVal" style="color:var(--accent)">N3</span></label>
       <input type="range" id="settingsJlpt" min="1" max="5" value="3" step="1" style="width:100%">
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
-        <span>N5</span><span>N4</span><span>N3</span><span>N2</span><span>N1</span>
+        <span>N1</span><span>N2</span><span>N3</span><span>N4</span><span>N5</span>
       </div>
     </div>
     <div class="field">
       <label>标注层</label>
       <div class="layer-toggles">
-        <div class="layer-row"><span>假名 (Furigana)</span><label class="toggle"><input type="checkbox" id="lyrFurigana" checked><span class="track"></span></label></div>
-        <div class="layer-row"><span>罗马音 (Rōmaji)</span><label class="toggle"><input type="checkbox" id="lyrRomaji"><span class="track"></span></label></div>
-        <div class="layer-row"><span>词性 (POS)</span><label class="toggle"><input type="checkbox" id="lyrPos" checked><span class="track"></span></label></div>
-        <div class="layer-row"><span>动词分类 (Verb)</span><label class="toggle"><input type="checkbox" id="lyrVerb"><span class="track"></span></label></div>
-        <div class="layer-row"><span>词源 (Etymology)</span><label class="toggle"><input type="checkbox" id="lyrEtym"><span class="track"></span></label></div>
-        <div class="layer-row"><span>文法角色 (Grammar)</span><label class="toggle"><input type="checkbox" id="lyrGrammar" checked><span class="track"></span></label></div>
-        <div class="layer-row"><span>句子分段 (Segments)</span><label class="toggle"><input type="checkbox" id="lyrSegments" checked><span class="track"></span></label></div>
+        <div class="layer-row"><span>假名</span><label class="toggle"><input type="checkbox" id="lyrFurigana" checked><span class="track"></span></label></div>
+        <div class="layer-row"><span>罗马音</span><label class="toggle"><input type="checkbox" id="lyrRomaji"><span class="track"></span></label></div>
+        <div class="layer-row"><span>词性</span><label class="toggle"><input type="checkbox" id="lyrPos" checked><span class="track"></span></label></div>
+        <div class="layer-row"><span>动词分类</span><label class="toggle"><input type="checkbox" id="lyrVerb"><span class="track"></span></label></div>
+        <div class="layer-row"><span>词源</span><label class="toggle"><input type="checkbox" id="lyrEtym"><span class="track"></span></label></div>
+        <div class="layer-row"><span>文法角色</span><label class="toggle"><input type="checkbox" id="lyrGrammar" checked><span class="track"></span></label></div>
+        <div class="layer-row"><span>句子分段</span><label class="toggle"><input type="checkbox" id="lyrSegments" checked><span class="track"></span></label></div>
       </div>
     </div>
   </div>

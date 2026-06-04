@@ -107,6 +107,7 @@ body.dark{
 /* ── JLPT Slider ─────────────────────────────────────────────────────────── */
 .jlpt-row{
   display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);
+  position:relative;padding-bottom:16px;
 }
 .jlpt-slider{
   flex:1;-webkit-appearance:none;height:4px;background:var(--border);

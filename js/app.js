@@ -110,9 +110,9 @@ function syncUI() {
   // Settings
   dom.settingsApiKey.value = state.apiKey;
   dom.settingsJlpt.value = state.jlptLevel;
-  dom.settingsJlptVal.textContent = `N${state.jlptLevel}`;
+  dom.settingsJlptVal.textContent = `N${6 - state.jlptLevel}`;
   dom.jlptSlider.value = state.jlptLevel;
-  dom.jlptLabel.textContent = `N${state.jlptLevel}`;
+  dom.jlptLabel.textContent = `N${6 - state.jlptLevel}`;
 
   // Layers
   dom.lyrFurigana.checked = state.layers.furigana;
@@ -161,7 +161,7 @@ async function doAnnotate() {
   dom.analysisView.innerHTML = '<div class="ana-empty">解析中…</div>';
 
   try {
-    const lv = `N${state.jlptLevel}`;
+    const lv = `N${6 - state.jlptLevel}`;
     const withGrammar = state.layers.grammar || state.layers.segments;
     const result = await JRApi.annotate(text, lv, state.apiKey, withGrammar);
     const html = Renderer.render(text, result.words, result.structure, state.layers);
@@ -450,14 +450,14 @@ QA('.layer-toggles input[type="checkbox"]').forEach(el => {
 });
 dom.settingsApiKey.addEventListener('change', saveSettings);
 dom.settingsJlpt.addEventListener('input', () => {
-  dom.settingsJlptVal.textContent = `N${dom.settingsJlpt.value}`;
+  dom.settingsJlptVal.textContent = `N${6 - parseInt(dom.settingsJlpt.value)}`;
   dom.jlptSlider.value = dom.settingsJlpt.value;
-  dom.jlptLabel.textContent = `N${dom.settingsJlpt.value}`;
+  dom.jlptLabel.textContent = `N${6 - parseInt(dom.settingsJlpt.value)}`;
   saveSettings();
 });
 dom.jlptSlider.addEventListener('input', () => {
   state.jlptLevel = parseInt(dom.jlptSlider.value);
-  dom.jlptLabel.textContent = `N${state.jlptLevel}`;
+  dom.jlptLabel.textContent = `N${6 - state.jlptLevel}`;
   // Sync settings panel slider
   dom.settingsJlpt.value = state.jlptLevel;
   dom.settingsJlptVal.textContent = dom.jlptLabel.textContent;

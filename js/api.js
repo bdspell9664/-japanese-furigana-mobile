@@ -80,7 +80,7 @@ const JRApi = {
 
   /** Annotate text: returns {words:[], structure:[]|null} */
   async annotate(text, jlptLevel, apiKey, withGrammar=false) {
-    const lv = typeof jlptLevel === 'number' ? `N${jlptLevel}` : (jlptLevel||'N3');
+    const lv = typeof jlptLevel === 'number' ? `N${6-jlptLevel}` : (jlptLevel||'N3');
     const suffix = withGrammar ? '|g' : '|b';
     const h = hash(text+'|'+lv+suffix);
     const cached = cacheGet(h);

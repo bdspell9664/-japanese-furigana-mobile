@@ -69,7 +69,19 @@ function annotPrompt(level, grammar){
 格式：{"words":[{"surface":"原词","reading":"平假名","romaji":"罗马字","pos":"词性","verb_type":"动词分类或null","origin":"和語/漢語/外来語","annotate":true}]}`;
 }
 
-const DICT_PROMPT=`你是专业日语词典。返回：1.词性 2.准确简洁中文释义 3.自然日文例句 4.语法功能简述。严格JSON：{"pos":"词性","definition":"中文释义","example":"日文例句","grammar_note":"语法功能简述"}`;
+const DICT_PROMPT=`你是专业日语词典+语法分析助手。针对给定的日语单词及其上下文，请返回详细分析。严格JSON输出。
+
+要求：
+1. pos: 词性
+2. definition: 准确简洁的中文释义（含常见用法提示）
+3. grammar_role: 该词在上下文中的具体语法作用（主语/谓语/宾语/定语/状语/补语/助词/接续/独立语等）
+4. base_form: 原形（活用词还原，终止形）
+5. conjugation: 活用形说明（如：连用形、未然形+被动、て形等，无活用填null）
+6. example: 包含该词的自然日文例句
+7. usage_note: 用法提示（如：接续规则、常见搭配、敬语注意事项等）
+
+输出格式：
+{"pos":"词性","definition":"中文释义","grammar_role":"语法角色","base_form":"原形","conjugation":"活用形或null","example":"日文例句","usage_note":"用法提示或null"}`;
 
 const ANALYZE_PROMPT=`你是专业日语语法分析助手。分析句子并严格JSON输出。
 格式：{"structure":"树状结构","grammar_points":[{"point":"语法名","description":"解释","highlight":"关键字"}],"translation":"中文翻译","word_analysis":[{"word":"词","reading":"读音","role":"语法角色","base_form":"原形"}],"sentence_type":"句型","politeness_level":"敬语级别"}`;

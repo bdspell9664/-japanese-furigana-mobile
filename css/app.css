@@ -59,6 +59,7 @@ body.dark{
 .article-card{padding:12px 14px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:all .15s}
 .article-card:active{transform:scale(.98);background:var(--accent-light)}
 .article-card .art-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:4px}
+.article-card .art-desc{font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .article-card .art-meta{font-size:10px;color:var(--text3);display:flex;gap:8px}
 .article-card .art-tag{padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;background:var(--accent-light);color:var(--accent)}
 
@@ -129,7 +130,15 @@ body.dark{
 .sheet-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .sheet-tag{padding:3px 10px;border-radius:14px;font-size:11px;font-weight:700;background:var(--accent-light);color:var(--accent)}
 .sheet-tag.grammar{background:color-mix(in srgb,var(--tgc,#888) 15%,transparent);color:var(--tgc,#888);border:1px solid color-mix(in srgb,var(--tgc,#888) 30%,transparent)}
-.sheet-def{font-size:15px;color:var(--text);line-height:1.8;margin-bottom:10px}
+.sheet-def{font-size:15px;color:var(--text);line-height:1.8;margin-bottom:2px}
+.sheet-section{padding:8px 0;border-bottom:1px solid var(--border)}
+.sheet-section:last-child{border-bottom:none}
+.sheet-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.sheet-role{font-size:14px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:6px}
+.sheet-conjug{font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sheet-conjug .base-tag{font-size:12px;padding:2px 8px;background:var(--accent-light);color:var(--accent);border-radius:10px}
+.sheet-conjug .conj-tag{font-size:11px;padding:2px 8px;background:var(--bg3);color:var(--text2);border-radius:10px}
+.sheet-conjug .arrow-icon{color:var(--text3);font-size:12px}
 .sheet-ex{font-size:13px;color:var(--text2);padding:8px 12px;background:var(--bg2);border-radius:var(--radius-sm);margin-bottom:8px;line-height:1.7}
 .sheet-grammar-note{font-size:12px;color:var(--purple);padding:6px 10px;background:#f5f3ff;border-radius:var(--radius-sm);margin-bottom:12px}
 body.dark .sheet-grammar-note{background:#2a2040;color:#a78bfa}

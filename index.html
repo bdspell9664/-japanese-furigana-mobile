@@ -41,6 +41,14 @@
     <div class="discover-search">
       <input type="text" id="discoverSearch" placeholder="搜索单词…" autocomplete="off">
     </div>
+    <!-- Quick import -->
+    <div class="feed-section">
+      <div class="feed-header">
+        <span class="feed-title">📋 快速开始</span>
+      </div>
+      <textarea id="quickImport" rows="3" placeholder="在此粘贴日文文本，点击"导入"即可开始阅读…" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;line-height:1.7;font-family:var(--sans);resize:none;background:var(--bg);color:var(--text);outline:none"></textarea>
+      <button class="btn btn-primary" id="btnQuickImport" style="margin-top:8px;width:100%;justify-content:center">📖 导入并解析</button>
+    </div>
     <!-- NHK News feed -->
     <div class="feed-section" id="nhkFeed">
       <div class="feed-header">
@@ -142,9 +150,31 @@
   <div class="sheet-word" id="sheetWord"></div>
   <div class="sheet-reading" id="sheetReading"></div>
   <div class="sheet-tags" id="sheetTags"></div>
-  <div class="sheet-def" id="sheetDef"></div>
-  <div class="sheet-grammar-note" id="sheetGNote" style="display:none"></div>
-  <div class="sheet-ex" id="sheetEx"></div>
+  <!-- ── 语法作用 ── -->
+  <div class="sheet-section" id="sheetRoleSec" style="display:none">
+    <div class="sheet-label">语法作用</div>
+    <div class="sheet-role" id="sheetRole"></div>
+  </div>
+  <!-- ── 释义 ── -->
+  <div class="sheet-section">
+    <div class="sheet-label">释义</div>
+    <div class="sheet-def" id="sheetDef"></div>
+  </div>
+  <!-- ── 活用形 ── -->
+  <div class="sheet-section" id="sheetConjugSec" style="display:none">
+    <div class="sheet-label">活用形</div>
+    <div class="sheet-conjug" id="sheetConjug"></div>
+  </div>
+  <!-- ── 例句 ── -->
+  <div class="sheet-section">
+    <div class="sheet-label">例句</div>
+    <div class="sheet-ex" id="sheetEx"></div>
+  </div>
+  <!-- ── 用法提示 ── -->
+  <div class="sheet-section" id="sheetUsageSec" style="display:none">
+    <div class="sheet-label">用法提示</div>
+    <div class="sheet-grammar-note" id="sheetGNote"></div>
+  </div>
   <div class="sheet-actions" style="display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn btn-primary" id="btnSaveWord">☆ 收藏</button>
     <select id="sheetListSelect" class="list-select" style="flex:1;min-width:0;font-size:11px;padding:8px"></select>

@@ -15,6 +15,7 @@ const dom={};
     'discoverPanel','readingPanel','analysisPanel','savedPanel','reviewPanel',
     // Discover
     'discoverSearch','nhkFeed','btnRefreshFeed','feedList','listOverview','btnNewList',
+    'quickImport','btnQuickImport',
     // Reading
     'textInput','urlInput','btnFetch','btnPaste','btnAnnotate','btnSpeakAll','jlptSlider','jlptLabel','readingView',
     // Analysis
@@ -29,6 +30,7 @@ const dom={};
     // Sheet
     'sheetOverlay','wordSheet','sheetWord','sheetReading','sheetTags','sheetDef','sheetEx',
     'sheetGNote','btnSaveWord','sheetListSelect','btnSheetSpeak',
+    'sheetRoleSec','sheetRole','sheetConjugSec','sheetConjug','sheetUsageSec',
     // Settings
     'btnSettings','settingsOverlay','settingsPanel','settingsApiKey','settingsJlpt',
     'settingsJlptVal','settingsClose',
@@ -106,14 +108,14 @@ dom.tabBtns.forEach((b,i)=>b.addEventListener('click',()=>switchTab(i)));
 // ═══════════════════════════════════════════════════════════════════════
 
 const NHK_FEED=[
-  {title:'ニュースの言葉「拉致」','date':'2025-05-30',tags:['社会']},
-  {title:'ニュースの言葉「食品ロス」','date':'2025-05-28',tags:['社会']},
-  {title:'ニュースの言葉「熱中症」','date':'2025-05-25',tags:['生活']},
-  {title:'ニュースの言葉「国会」','date':'2025-05-22',tags:['政治']},
-  {title:'ニュースの言葉「円安」','date':'2025-05-20',tags:['経済']},
-  {title:'ニュースの言葉「人工知能」','date':'2025-05-18',tags:['科学']},
-  {title:'ニュースの言葉「地震」','date':'2025-05-15',tags:['社会']},
-  {title:'ニュースの言葉「ワクチン」','date':'2025-05-12',tags:['医療']},
+  {title:'「拉致」問題','desc:'北朝鮮による日本人拉致問題。政府は被害者の早期帰国を目指している。',date:'2025-05-30',tags:['社会']},
+  {title:'食品ロスを減らそう','desc:'日本では年間約500万トンの食品が廃棄されている。家庭での対策が重要だ。',date:'2025-05-28',tags:['社会']},
+  {title:'熱中症に注意','desc:'夏の暑さによる熱中症で、毎年多くの人が病院に運ばれている。水分補給が大切。',date:'2025-05-25',tags:['生活']},
+  {title:'国会で法案審議','desc:'新しい法律について国会で議論が行われている。野党は修正を求めている。',date:'2025-05-22',tags:['政治']},
+  {title:'円安が進む','desc:'外国為替市場で円安が進み、輸入品の価格が上昇している。家計への影響が懸念される。',date:'2025-05-20',tags:['経済']},
+  {title:'人工知能の活用','desc:'AI技術の発展により、様々な分野で人工知能の活用が進んでいる。',date:'2025-05-18',tags:['科学']},
+  {title:'大きな地震に備える','desc:'日本は地震が多い国だ。防災グッズの準備や避難場所の確認が大切。',date:'2025-05-15',tags:['社会']},
+  {title:'新しいワクチン開発','desc:'感染症から人々を守るため、新しいワクチンの研究が進められている。',date:'2025-05-12',tags:['医療']},
 ];
 
 async function fetchNHKFeed(){
@@ -142,8 +144,9 @@ async function fetchNHKFeed(){
 
 function renderStaticFeed(){
   dom.feedList.innerHTML=NHK_FEED.map((a,i)=>`
-    <div class="article-card" data-title="${ESC(a.title)}">
+    <div class="article-card" data-desc="${ESC(a.desc||'')}" data-title="${ESC(a.title)}">
       <div class="art-title">${ESC(a.title)}</div>
+      <div class="art-desc">${ESC(a.desc||'')}</div>
       <div class="art-meta"><span>${a.date}</span>${a.tags.map(t=>`<span class="art-tag">${t}</span>`).join('')}</div>
     </div>
   `).join('');
@@ -168,8 +171,9 @@ function bindFeedClicks(){
         dom.urlInput.value=url;
         dom.btnFetch.click();
       }else{
-        // Pre-written static articles: use title as search context
-        dom.textInput.value='「'+title+'」についてのニュースです。';
+        // Static articles: use description as reading material
+        const desc=card.dataset.desc||title;
+        dom.textInput.value=desc;
         dom.btnAnnotate.click();
       }
       switchTab(1);
@@ -244,11 +248,14 @@ function bindWordTaps(){
     el.addEventListener('click',e=>{e.stopPropagation();
       const s=el.dataset.surface||'',r=el.dataset.reading||'',p=el.dataset.pos||'';
       const g=el.dataset.grammar||'',bf=el.dataset.base||'';
-      openSheet(s,r,p,g,'查询中…','','',bf);
+      openSheet(s,r,p,g,'查询中…','','',bf,'',null);
       JRApi.lookup(s,r,state.text.slice(0,500),state.apiKey).then(res=>{
-        if(res)updateSheet(res.pos||p,res.definition||'',res.example||'',res.grammar_note||g,bf);
-        else updateSheet(p,'暂无释义','',g,bf);
-      }).catch(()=>updateSheet(p,'查询失败','',g,bf));
+        if(res){
+          updateSheet(res.pos||p,res.definition||'暂无释义',res.example||'',res.grammar_role||g,res.base_form||bf,res.grammar_role||g,res.conjugation||null,res.usage_note||null);
+        } else {
+          updateSheet(p,'暂无释义','',g,bf,g,null,null);
+        }
+      }).catch(()=>updateSheet(p,'查询失败','',g,bf,g,null,null));
     });
   });
 }
@@ -295,24 +302,33 @@ dom.urlInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault
 // SHEET (word detail)
 // ═══════════════════════════════════════════════════════════════════════
 
-function openSheet(w,rd,pos,gr,def,ex,gn,bf){
-  state._currentWord={word:w,reading:rd,pos,grammar:gr,def,example:ex,gnote:gn,baseForm:bf};
+function openSheet(w,rd,pos,gr,def,ex,gn,bf,conj,unote){
+  state._currentWord={word:w,reading:rd,pos,grammar:gr,def,example:ex,gnote:gn,baseForm:bf,conjugation:conj,usageNote:unote};
   dom.sheetWord.textContent=w;dom.sheetReading.textContent=rd||'';
   dom.sheetTags.innerHTML='';if(pos)dom.sheetTags.innerHTML+=`<span class="sheet-tag">${pos}</span>`;
   if(gr){const c=getGC(gr);dom.sheetTags.innerHTML+=`<span class="sheet-tag grammar" style="--tgc:${c}">${gr}</span>`}
-  dom.sheetDef.textContent=def;dom.sheetEx.textContent=ex;
-  dom.sheetGNote.style.display=gn?'':'none';dom.sheetGNote.textContent=gn||'';
+  // Grammar role section
+  if(gr){dom.sheetRole.textContent=gr;dom.sheetRoleSec.style.display=''}else{dom.sheetRoleSec.style.display='none'}
+  // Definition
+  dom.sheetDef.textContent=def||'查询中…';
+  // Conjugation section
+  if(conj||bf){dom.sheetConjug.innerHTML=(bf&&bf!==w?`<span class="base-tag">原形：${bf}</span>`:'')+(conj?`<span class="conj-tag">${conj}</span>`:'');dom.sheetConjugSec.style.display=''}else{dom.sheetConjugSec.style.display='none'}
+  // Example
+  dom.sheetEx.textContent=ex||'';
+  // Usage note
+  if(unote){dom.sheetGNote.textContent=unote;dom.sheetUsageSec.style.display=''}else{dom.sheetUsageSec.style.display='none'}
   dom.btnSaveWord.textContent='☆ 收藏';dom.btnSaveWord.classList.remove('saved');
-  // populate list selector
   dom.sheetListSelect.innerHTML=state.wordLists.map((l,i)=>`<option value="${i}" ${i===state.activeListIdx?'selected':''}>${ESC(l.name)} (${l.words.length})</option>`).join('');
   dom.sheetOverlay.classList.add('open');dom.wordSheet.classList.add('open');
 }
-function updateSheet(pos,def,ex,gn,bf){
+function updateSheet(pos,def,ex,gn,bf,gr,conj,unote){
   if(!state._currentWord)return;
   if(pos){dom.sheetTags.innerHTML='<span class="sheet-tag">'+pos+'</span>'+dom.sheetTags.innerHTML;state._currentWord.pos=pos}
-  dom.sheetDef.textContent=def;dom.sheetEx.textContent=ex;
-  if(gn){dom.sheetGNote.style.display='';dom.sheetGNote.textContent=gn;state._currentWord.gnote=gn}
-  state._currentWord.def=def;state._currentWord.example=ex;
+  if(gr&&!state._currentWord.grammar){const c=getGC(gr);dom.sheetTags.innerHTML+=`<span class="sheet-tag grammar" style="--tgc:${c}">${gr}</span>`;dom.sheetRole.textContent=gr;dom.sheetRoleSec.style.display='';state._currentWord.grammar=gr}
+  dom.sheetDef.textContent=def||'暂无释义';state._currentWord.def=def;
+  dom.sheetEx.textContent=ex||'暂无例句';state._currentWord.example=ex;
+  if(conj||bf){dom.sheetConjug.innerHTML=(bf&&bf!==state._currentWord.word?`<span class="base-tag">原形：${bf}</span>`:'')+(conj?`<span class="conj-tag">${conj}</span>`:'');dom.sheetConjugSec.style.display='';state._currentWord.baseForm=bf;state._currentWord.conjugation=conj}
+  if(unote){dom.sheetGNote.textContent=unote;dom.sheetUsageSec.style.display='';state._currentWord.gnote=unote;state._currentWord.usageNote=unote}
 }
 function closeSheet(){dom.sheetOverlay.classList.remove('open');dom.wordSheet.classList.remove('open')}
 function getGC(r){const m={'主語':'#2563eb','述語':'#d43d3d','目的語':'#059669','連体修飾語':'#7c3aed','連用修飾語':'#d97706','補語':'#0891b2','助詞':'#6b7280','接続詞':'#db2777'};return m[r]||'#888'}
@@ -499,6 +515,11 @@ dom.btnDark.addEventListener('click',()=>{state.darkTheme=!state.darkTheme;docum
 dom.btnPaste.addEventListener('click',async()=>{try{const t=await navigator.clipboard.readText();if(t){dom.textInput.value=t;toast('已粘贴')}}catch{toast('无法读取剪贴板')}});
 dom.btnAnnotate.addEventListener('click',doAnnotate);
 dom.btnRefreshFeed.addEventListener('click',fetchNHKFeed);
+dom.btnQuickImport.addEventListener('click',()=>{
+  const t=dom.quickImport.value.trim();
+  if(!t){toast('请粘贴日文文本');return}
+  dom.textInput.value=t;dom.btnAnnotate.click();switchTab(1);
+});
 
 // Search in discover page
 dom.discoverSearch.addEventListener('input',()=>{

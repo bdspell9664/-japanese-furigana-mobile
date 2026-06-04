@@ -78,20 +78,20 @@ function toast(m){dom.toast.textContent=m;dom.toast.classList.add('show');clearT
 
 // ── TTS ─────────────────────────────────────────────────────────────────
 let speaking=false;
-function speak(text,rate=0.9){
+function speak(text,rate=0.9,el=null){
   if(!text)return;
-  speechSynthesis.cancel();
-  if(text===speaking){speechSynthesis.cancel();speaking=false;return}
+  // Toggle: stop if already speaking same text
+  if(speaking){speechSynthesis.cancel();speaking=false;if(el)el.classList.remove('speaking');return}
   const u=new SpeechSynthesisUtterance(text);
   u.lang='ja-JP';u.rate=rate;
   const voices=speechSynthesis.getVoices();
   const jp=voices.find(v=>v.lang.startsWith('ja'));if(jp)u.voice=jp;
-  u.onend=()=>speaking=false;
-  u.onerror=()=>speaking=false;
-  speaking=text;
+  u.onend=()=>{speaking=false;if(el)el.classList.remove('speaking');};
+  u.onerror=()=>{speaking=false;if(el)el.classList.remove('speaking');};
+  speaking=true;if(el)el.classList.add('speaking');
   speechSynthesis.speak(u);
 }
-function speakWord(){const w=state._currentWord;if(w)speak(w.word)}
+function speakWord(){const w=state._currentWord;if(w)speak(w.word,0.9)}
 
 // ── Tab switching ───────────────────────────────────────────────────────
 function switchTab(idx){
@@ -108,21 +108,20 @@ dom.tabBtns.forEach((b,i)=>b.addEventListener('click',()=>switchTab(i)));
 // ═══════════════════════════════════════════════════════════════════════
 
 const NHK_FEED=[
-  {title:'「拉致」問題','desc:'北朝鮮による日本人拉致問題。政府は被害者の早期帰国を目指している。',date:'2025-05-30',tags:['社会']},
-  {title:'食品ロスを減らそう','desc:'日本では年間約500万トンの食品が廃棄されている。家庭での対策が重要だ。',date:'2025-05-28',tags:['社会']},
-  {title:'熱中症に注意','desc:'夏の暑さによる熱中症で、毎年多くの人が病院に運ばれている。水分補給が大切。',date:'2025-05-25',tags:['生活']},
-  {title:'国会で法案審議','desc:'新しい法律について国会で議論が行われている。野党は修正を求めている。',date:'2025-05-22',tags:['政治']},
-  {title:'円安が進む','desc:'外国為替市場で円安が進み、輸入品の価格が上昇している。家計への影響が懸念される。',date:'2025-05-20',tags:['経済']},
-  {title:'人工知能の活用','desc:'AI技術の発展により、様々な分野で人工知能の活用が進んでいる。',date:'2025-05-18',tags:['科学']},
-  {title:'大きな地震に備える','desc:'日本は地震が多い国だ。防災グッズの準備や避難場所の確認が大切。',date:'2025-05-15',tags:['社会']},
-  {title:'新しいワクチン開発','desc:'感染症から人々を守るため、新しいワクチンの研究が進められている。',date:'2025-05-12',tags:['医療']},
+  {title:'「拉致」問題',desc:'北朝鮮による日本人拉致問題。政府は被害者の早期帰国を目指している。',date:'2025-05-30',tags:['社会']},
+  {title:'食品ロスを減らそう',desc:'日本では年間約500万トンの食品が廃棄されている。家庭での対策が重要だ。',date:'2025-05-28',tags:['社会']},
+  {title:'熱中症に注意',desc:'夏の暑さによる熱中症で、毎年多くの人が病院に運ばれている。水分補給が大切。',date:'2025-05-25',tags:['生活']},
+  {title:'国会で法案審議',desc:'新しい法律について国会で議論が行われている。野党は修正を求めている。',date:'2025-05-22',tags:['政治']},
+  {title:'円安が進む',desc:'外国為替市場で円安が進み、輸入品の価格が上昇している。家計への影響が懸念される。',date:'2025-05-20',tags:['経済']},
+  {title:'人工知能の活用',desc:'AI技術の発展により、様々な分野で人工知能の活用が進んでいる。',date:'2025-05-18',tags:['科学']},
+  {title:'大きな地震に備える',desc:'日本は地震が多い国だ。防災グッズの準備や避難場所の確認が大切。',date:'2025-05-15',tags:['社会']},
+  {title:'新しいワクチン開発',desc:'感染症から人々を守るため、新しいワクチンの研究が進められている。',date:'2025-05-12',tags:['医療']},
 ];
 
 async function fetchNHKFeed(){
-  dom.feedList.innerHTML='<div class="feed-loading">加载NHK Easy News...</div>';
-  if(!state.apiKey||!state.apiKey.startsWith('sk-')){
-    renderStaticFeed();return;
-  }
+  // Show static feed immediately, replace with live if fetch succeeds
+  renderStaticFeed();
+  if(!state.apiKey||!state.apiKey.startsWith('sk-'))return;
   try{
     const proxy='https://api.allorigins.win/raw?url='+encodeURIComponent('https://www3.nhk.or.jp/news/easy/');
     const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),8000);
@@ -181,9 +180,13 @@ function bindFeedClicks(){
   });
 }
 
+let _nhkFetchTimer=null;
 function refreshDiscoverPage(){
   renderListOverview();
-  fetchNHKFeed();
+  renderStaticFeed();
+  // Debounced live fetch
+  clearTimeout(_nhkFetchTimer);
+  _nhkFetchTimer=setTimeout(()=>fetchNHKFeed(),500);
 }
 
 function renderListOverview(){
@@ -233,14 +236,17 @@ function addSpeakButtons(){
     if(el.querySelector('.rw-speak'))return;
     const btn=document.createElement('span');btn.className='rw-speak';
     btn.textContent='🔊';
-    btn.addEventListener('click',e=>{e.stopPropagation();const s=el.dataset.surface||el.textContent.trim();speak(s)});
+    btn.addEventListener('click',e=>{e.stopPropagation();const s=el.dataset.surface||el.textContent.trim();speak(s,0.9,el)});
     el.appendChild(btn);
   });
 }
 
 dom.btnSpeakAll.addEventListener('click',()=>{
-  const text=dom.textInput.value.trim()||state.text;speak(text,0.85);
-  toast('朗读全文...');
+  const text=dom.textInput.value.trim()||state.text;
+  if(speaking){speechSynthesis.cancel();speaking=false;dom.btnSpeakAll.textContent='🔊 朗读';dom.btnSpeakAll.style.color='';return}
+  dom.btnSpeakAll.textContent='⏹ 停止';dom.btnSpeakAll.style.color='var(--accent)';
+  speak(text,0.85);
+  dom.btnSpeakAll._check=setInterval(()=>{if(!speaking){dom.btnSpeakAll.textContent='🔊 朗读';dom.btnSpeakAll.style.color='';clearInterval(dom.btnSpeakAll._check)}},300);
 });
 
 function bindWordTaps(){
@@ -345,7 +351,7 @@ dom.wordSheet.addEventListener('touchmove',e=>{if(e.touches[0].clientY-ssY>80)cl
 dom.btnSaveWord.addEventListener('click',()=>{
   const w=state._currentWord;if(!w||dom.btnSaveWord.classList.contains('saved'))return;
   const li=parseInt(dom.sheetListSelect.value)||state.activeListIdx;
-  const entry={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),surface:w.word,reading:w.reading,pos:w.pos,definition:w.def,example:w.example,grammar_note:w.gnote,ts:Date.now(),review:{next:Date.now(),interval:0,ef:2.5}}
+  const entry={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),surface:w.word,reading:w.reading,pos:w.pos,definition:w.def,example:w.example,grammar_note:w.gnote,conjugation:w.conjugation||null,usage_note:w.usageNote||null,ts:Date.now(),review:{next:Date.now(),interval:0,ef:2.5}}
   const list=state.wordLists[li];if(!list)return;
   if(list.words.find(s=>s.surface===entry.surface&&s.reading===entry.reading)){toast('已收藏过');return}
   list.words.push(entry);saveWordLists();

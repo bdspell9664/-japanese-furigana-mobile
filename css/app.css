@@ -103,6 +103,7 @@ body.dark{
 
 .rw-word{cursor:pointer;position:relative;transition:background .2s;border-radius:3px;padding:0 1px}
 .rw-word:active,.rw-word.tapped{background:var(--accent-light);border-radius:4px}
+.rw-word.speaking{background:var(--accent-light);box-shadow:0 0 0 2px var(--accent);border-radius:4px}
 .rw-word .rw-speak{display:none;font-size:.55em;margin-left:1px;color:var(--text3);cursor:pointer;vertical-align:super}
 .fa-s-speak .rw-word .rw-speak{display:inline-block}
 .rw-word ruby{font-size:inherit}

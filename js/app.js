@@ -254,9 +254,7 @@ function buildAnalysis(r){
   // Accordion toggle
   dom.analysisView.querySelectorAll('.ana-acc-hd').forEach(el=>{
     el.addEventListener('click',()=>{
-      const parent=el.parentElement;parent.classList.toggle('open');
-      const body=parent.querySelector('.ana-acc-bd');
-      if(parent.classList.contains('open'))body.style.display='block';else body.style.display='none';
+      el.parentElement.classList.toggle('open');
     });
   });
 }

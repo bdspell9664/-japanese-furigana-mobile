@@ -23,196 +23,181 @@
   </div>
 </header>
 
-<!-- ═══ Tab Bar (5 tabs, 发现 is default landing) ═══ -->
-<nav class="tab-bar">
-  <button class="tab-btn active" data-idx="0">🔍 发现</button>
-  <button class="tab-btn" data-idx="1">📖 阅读</button>
-  <button class="tab-btn" data-idx="2">🔬 分析</button>
-  <button class="tab-btn" data-idx="3">⭐ 收藏</button>
-  <button class="tab-btn" data-idx="4">🃏 复习</button>
-</nav>
-
 <!-- ═══ Main Content ═══ -->
 <main class="main-content">
 
-  <!-- ── Tab 0: Discover / Homepage ── -->
+  <!-- ── Tab 0: Discover ── -->
   <div class="tab-panel active" id="discoverPanel">
-    <!-- Search bar -->
-    <div class="discover-search">
-      <input type="text" id="discoverSearch" placeholder="搜索单词…" autocomplete="off">
+    <div class="discover-search"><input type="text" id="discoverSearch" placeholder="搜索单词…" autocomplete="off"></div>
+    <div class="quick-import-wrap">
+      <div style="font-size:12px;font-weight:700;margin-bottom:6px">📋 快速开始</div>
+      <textarea id="quickImport" placeholder="粘贴日文文本…"></textarea>
+      <button class="btn btn-primary" id="btnQuickImport" style="width:100%;justify-content:center;margin-top:8px">📖 导入并解析</button>
     </div>
-    <!-- Quick import -->
-    <div class="feed-section">
-      <div class="feed-header">
-        <span class="feed-title">📋 快速开始</span>
-      </div>
-      <textarea id="quickImport" rows="3" placeholder="在此粘贴日文文本，点击"导入"即可开始阅读…" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;line-height:1.7;font-family:var(--sans);resize:none;background:var(--bg);color:var(--text);outline:none"></textarea>
-      <button class="btn btn-primary" id="btnQuickImport" style="margin-top:8px;width:100%;justify-content:center">📖 导入并解析</button>
-    </div>
-    <!-- NHK News feed -->
     <div class="feed-section" id="nhkFeed">
-      <div class="feed-header">
-        <span class="feed-title">📰 NHK News Web Easy</span>
-        <button class="btn-ghost btn-small" id="btnRefreshFeed">刷新</button>
-      </div>
-      <div class="feed-list" id="feedList">
-        <div class="feed-loading">加载中…</div>
-      </div>
+      <div class="feed-header"><span class="feed-title">📰 NHK Easy News</span><button class="btn-ghost" id="btnRefreshFeed">刷新</button></div>
+      <div class="feed-grid" id="feedList"><div class="feed-loading" style="grid-column:1/-1;text-align:center">加载中…</div></div>
     </div>
-    <!-- Word Lists overview -->
     <div class="feed-section">
-      <div class="feed-header">
-        <span class="feed-title">📚 我的词单</span>
-        <button class="btn-ghost btn-small" id="btnNewList">+ 新建</button>
-      </div>
-      <div class="list-overview" id="listOverview"></div>
+      <div class="feed-header"><span class="feed-title">📚 词单</span><button class="btn-ghost" id="btnNewList">+ 新建</button></div>
+      <div class="list-row" id="listOverview"></div>
     </div>
   </div>
 
   <!-- ── Tab 1: Reading ── -->
   <div class="tab-panel" id="readingPanel">
-    <div class="input-area">
-      <textarea id="textInput" placeholder="在此输入或粘贴日文文本..."></textarea>
+    <div class="read-input">
+      <textarea id="textInput" placeholder="输入或粘贴日文文本…"></textarea>
       <div class="url-row">
         <input type="url" id="urlInput" placeholder="或输入日文新闻网址…" autocomplete="off">
         <button class="btn btn-secondary btn-small" id="btnFetch">🔗 获取</button>
       </div>
-      <div class="input-actions">
-        <button class="btn btn-primary" id="btnAnnotate">🔍 解析</button>
-        <button class="btn btn-secondary btn-small" id="btnPaste">📋 粘贴</button>
-        <button class="btn btn-ghost btn-small" id="btnSpeakAll" title="朗读全文">🔊 朗读</button>
-        <div class="jlpt-row">
-          <span style="font-size:11px;color:var(--text3)">JLPT:</span>
-          <span id="jlptLabel" style="font-size:11px;font-weight:700;color:var(--accent);min-width:24px">N3</span>
-          <input type="range" class="jlpt-slider" id="jlptSlider" min="1" max="5" value="3" step="1">
-        </div>
-      </div>
     </div>
     <div class="reading-view" id="readingView"></div>
+    <div class="read-toolbar">
+      <button class="btn btn-primary" id="btnAnnotate">🔍 解析</button>
+      <button class="btn btn-secondary btn-small" id="btnPaste">📋 粘贴</button>
+      <button class="btn btn-ghost btn-small" id="btnSpeakAll">🔊 朗读</button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3)">
+        <span id="jlptLabel" style="font-weight:700;color:var(--accent)">N3</span>
+        <input type="range" class="jlpt-slider" id="jlptSlider" min="1" max="5" value="3" step="1">
+      </div>
+    </div>
   </div>
 
   <!-- ── Tab 2: Analysis ── -->
   <div class="tab-panel" id="analysisPanel">
-    <div class="reading-view" id="analysisView">
-      <div class="ana-empty">深度语法分析<br><span style="font-size:12px;color:var(--text3)">标注后自动显示（800字以内）</span></div>
-    </div>
+    <div id="analysisView"><div class="ana-empty">解析后自动显示深度分析</div></div>
   </div>
 
-  <!-- ── Tab 3: Saved / Word Lists ── -->
+  <!-- ── Tab 3: Saved ── -->
   <div class="tab-panel" id="savedPanel">
-    <div class="list-nav">
-      <select id="listSelector" class="list-select"></select>
+    <div class="saved-search">
+      <input type="text" id="savedSearch" placeholder="过滤收藏…">
+      <button class="saved-sort" id="btnSavedSort">⇅ 排序</button>
+    </div>
+    <div class="list-nav" style="display:flex;gap:6px;margin-bottom:var(--space-sm);align-items:center">
+      <select id="listSelector" class="list-select" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;background:var(--bg);color:var(--text);outline:none"></select>
       <button class="btn-ghost btn-small" id="btnRenameList">重命名</button>
       <button class="btn-ghost btn-small" id="btnDeleteList">删除</button>
     </div>
     <div id="savedView" class="saved-empty">还没有收藏的单词</div>
   </div>
 
-  <!-- ── Tab 4: Flashcards ── -->
+  <!-- ── Tab 4: Review ── -->
   <div class="tab-panel" id="reviewPanel">
     <div class="review-setup" id="reviewSetup">
-      <div style="margin-bottom:10px;font-size:13px;color:var(--text2)">选择复习词单：</div>
-      <select id="reviewListSelect" class="list-select" style="margin-bottom:10px"></select>
-      <div style="margin-bottom:10px;font-size:11px;color:var(--text3)" id="reviewStats"></div>
+      <div class="review-pick">
+        <select id="reviewListSelect"></select>
+      </div>
+      <div class="review-progress-ring">
+        <svg viewBox="0 0 60 60"><circle class="ring-bg" cx="30" cy="30" r="26"/><circle class="ring-fg" id="ringFg" cx="30" cy="30" r="26" stroke-dasharray="163.36"/></svg>
+        <div class="ring-label" id="reviewStats">0</div>
+      </div>
       <button class="btn btn-primary" id="btnStartReview">开始复习</button>
     </div>
     <div class="flashcard" id="flashcard" style="display:none">
-      <div class="card-face card-front" id="cardFront">
-        <div class="card-word" id="cardWord"></div>
-        <div class="card-reading" id="cardReading"></div>
-      </div>
-      <div class="card-face card-back" id="cardBack" style="display:none">
-        <div class="card-word" id="cardBackWord"></div>
-        <div class="card-reading" id="cardBackReading"></div>
-        <div class="card-pos" id="cardPos"></div>
-        <div class="card-conj" id="cardConj"></div>
-        <div class="card-def" id="cardDef"></div>
-        <div class="card-ex" id="cardEx"></div>
-        <button class="btn btn-ghost btn-small card-speak">🔊</button>
+      <div class="card-inner" id="cardInner">
+        <div class="card-face card-front" id="cardFront">
+          <div class="card-word" id="cardWord"></div>
+          <div class="card-reading" id="cardReading"></div>
+          <button class="btn btn-ghost card-speak">🔊</button>
+        </div>
+        <div class="card-face card-back" id="cardBack">
+          <div class="card-word" id="cardBackWord"></div>
+          <div class="card-reading" id="cardBackReading"></div>
+          <div class="card-pos" id="cardPos"></div>
+          <div class="card-conj" id="cardConj"></div>
+          <div class="card-def" id="cardDef"></div>
+          <div class="card-ex" id="cardEx"></div>
+          <button class="btn btn-ghost card-speak">🔊</button>
+        </div>
       </div>
       <div class="card-actions" id="cardActions" style="display:none">
         <button class="btn btn-secondary btn-rate" data-rating="1">难 😰</button>
         <button class="btn btn-secondary btn-rate" data-rating="2">一般 🤔</button>
         <button class="btn btn-primary btn-rate" data-rating="3">简单 😊</button>
       </div>
-      <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text3)">
-        点击卡片翻转 · <span id="reviewProgress"></span>
-        <button class="btn-ghost btn-small" id="btnEndReview">结束</button>
+      <div style="text-align:center;margin-top:var(--space-sm);font-size:11px;color:var(--text3)">
+        <span id="reviewProgress"></span> · <button class="btn-ghost btn-small" id="btnEndReview">结束</button>
       </div>
     </div>
   </div>
 
 </main>
 
+<!-- ═══ Bottom Dock ═══ -->
+<nav class="dock">
+  <button class="dock-btn active" data-idx="0"><span class="dock-icon">🔍</span>发现</button>
+  <button class="dock-btn" data-idx="1"><span class="dock-icon">📖</span>阅读</button>
+  <button class="dock-btn" data-idx="2"><span class="dock-icon">🔬</span>分析</button>
+  <button class="dock-btn" data-idx="3"><span class="dock-icon">⭐</span>收藏</button>
+  <button class="dock-btn" data-idx="4"><span class="dock-icon">🃏</span>复习</button>
+</nav>
+
 <!-- ═══ Word Detail Sheet ═══ -->
 <div class="sheet-overlay" id="sheetOverlay"></div>
 <div class="word-sheet" id="wordSheet">
   <div class="sheet-handle"></div>
-  <div class="sheet-word" id="sheetWord"></div>
-  <div class="sheet-reading" id="sheetReading"></div>
-  <div class="sheet-tags" id="sheetTags"></div>
-  <!-- ── 语法作用 ── -->
-  <div class="sheet-section" id="sheetRoleSec" style="display:none">
-    <div class="sheet-label">语法作用</div>
-    <div class="sheet-role" id="sheetRole"></div>
+  <div class="sheet-top">
+    <div><div class="sheet-word" id="sheetWord"></div><div class="sheet-reading" id="sheetReading"></div></div>
+    <div class="sheet-tags" id="sheetTags"></div>
   </div>
-  <!-- ── 释义 ── -->
-  <div class="sheet-section">
-    <div class="sheet-label">释义</div>
+  <div class="sheet-tab-bar">
+    <button class="sheet-tab active" data-tab="def">释义</button>
+    <button class="sheet-tab" data-tab="grammar">语法</button>
+    <button class="sheet-tab" data-tab="ex">例句</button>
+  </div>
+  <!-- 释义 -->
+  <div class="sheet-tab-content active" id="tabDef">
     <div class="sheet-def" id="sheetDef"></div>
   </div>
-  <!-- ── 活用形 ── -->
-  <div class="sheet-section" id="sheetConjugSec" style="display:none">
-    <div class="sheet-label">活用形</div>
+  <!-- 语法 -->
+  <div class="sheet-tab-content" id="tabGrammar">
+    <div class="sheet-role" id="sheetRole"></div>
     <div class="sheet-conjug" id="sheetConjug"></div>
+    <div class="sheet-usage" id="sheetGNote" style="display:none"></div>
   </div>
-  <!-- ── 例句 ── -->
-  <div class="sheet-section">
-    <div class="sheet-label">例句</div>
+  <!-- 例句 -->
+  <div class="sheet-tab-content" id="tabEx">
     <div class="sheet-ex" id="sheetEx"></div>
   </div>
-  <!-- ── 用法提示 ── -->
-  <div class="sheet-section" id="sheetUsageSec" style="display:none">
-    <div class="sheet-label">用法提示</div>
-    <div class="sheet-grammar-note" id="sheetGNote"></div>
-  </div>
-  <div class="sheet-actions" style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="sheet-list-pills" id="sheetListPills"></div>
+  <div class="sheet-actions">
     <button class="btn btn-primary" id="btnSaveWord">☆ 收藏</button>
-    <select id="sheetListSelect" class="list-select" style="flex:1;min-width:0;font-size:11px;padding:8px"></select>
-    <button class="btn btn-ghost btn-small" id="btnSheetSpeak">🔊</button>
+    <button class="btn btn-ghost" id="btnSheetSpeak">🔊 朗读</button>
   </div>
 </div>
 
-<!-- ═══ Settings Panel ═══ -->
+<!-- ═══ Settings Bottom Sheet ═══ -->
 <div class="settings-overlay" id="settingsOverlay"></div>
-<div class="settings-panel" id="settingsPanel">
-  <div class="settings-header">
-    <h3>设置</h3>
+<div class="settings-sheet" id="settingsSheet">
+  <div class="sheet-handle"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-md)">
+    <h3 style="font-size:15px;font-weight:700;color:var(--accent)">设置</h3>
     <button class="header-btn" id="settingsClose">✕</button>
   </div>
-  <div class="settings-body">
-    <div class="field">
-      <label>DeepSeek API Key</label>
-      <input type="password" id="settingsApiKey" placeholder="sk-..." autocomplete="off">
+  <div class="field">
+    <label>DeepSeek API Key</label>
+    <input type="password" id="settingsApiKey" placeholder="sk-..." autocomplete="off">
+  </div>
+  <div class="field">
+    <label>JLPT 级别：<span id="settingsJlptVal" style="color:var(--accent)">N3</span></label>
+    <input type="range" id="settingsJlpt" min="1" max="5" value="3" step="1" style="width:100%">
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:2px">
+      <span>N1</span><span>N2</span><span>N3</span><span>N4</span><span>N5</span>
     </div>
-    <div class="field">
-      <label>JLPT 级别：<span id="settingsJlptVal" style="color:var(--accent)">N3</span></label>
-      <input type="range" id="settingsJlpt" min="1" max="5" value="3" step="1" style="width:100%">
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
-        <span>N1</span><span>N2</span><span>N3</span><span>N4</span><span>N5</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>标注层</label>
-      <div class="layer-toggles">
-        <div class="layer-row"><span>假名</span><label class="toggle"><input type="checkbox" id="lyrFurigana" checked><span class="track"></span></label></div>
-        <div class="layer-row"><span>罗马音</span><label class="toggle"><input type="checkbox" id="lyrRomaji"><span class="track"></span></label></div>
-        <div class="layer-row"><span>词性</span><label class="toggle"><input type="checkbox" id="lyrPos" checked><span class="track"></span></label></div>
-        <div class="layer-row"><span>动词分类</span><label class="toggle"><input type="checkbox" id="lyrVerb"><span class="track"></span></label></div>
-        <div class="layer-row"><span>词源</span><label class="toggle"><input type="checkbox" id="lyrEtym"><span class="track"></span></label></div>
-        <div class="layer-row"><span>文法角色</span><label class="toggle"><input type="checkbox" id="lyrGrammar" checked><span class="track"></span></label></div>
-        <div class="layer-row"><span>句子分段</span><label class="toggle"><input type="checkbox" id="lyrSegments" checked><span class="track"></span></label></div>
-      </div>
+  </div>
+  <div class="field">
+    <label>标注层</label>
+    <div class="layer-toggles">
+      <div class="layer-row"><span>假名</span><label class="toggle"><input type="checkbox" id="lyrFurigana" checked><span class="track"></span></label></div>
+      <div class="layer-row"><span>罗马音</span><label class="toggle"><input type="checkbox" id="lyrRomaji"><span class="track"></span></label></div>
+      <div class="layer-row"><span>词性</span><label class="toggle"><input type="checkbox" id="lyrPos" checked><span class="track"></span></label></div>
+      <div class="layer-row"><span>动词分类</span><label class="toggle"><input type="checkbox" id="lyrVerb"><span class="track"></span></label></div>
+      <div class="layer-row"><span>词源</span><label class="toggle"><input type="checkbox" id="lyrEtym"><span class="track"></span></label></div>
+      <div class="layer-row"><span>文法角色</span><label class="toggle"><input type="checkbox" id="lyrGrammar" checked><span class="track"></span></label></div>
+      <div class="layer-row"><span>句子分段</span><label class="toggle"><input type="checkbox" id="lyrSegments" checked><span class="track"></span></label></div>
     </div>
   </div>
 </div>
@@ -220,10 +205,8 @@
 <!-- ═══ Toast ═══ -->
 <div class="toast" id="toast"></div>
 
-<!-- ═══ Scripts ═══ -->
 <script src="js/api.js"></script>
 <script src="js/renderer.js"></script>
 <script src="js/app.js"></script>
-
 </body>
 </html>

@@ -55,17 +55,17 @@ const TinySegmenter={patterns:new Map(),rules:{}};
   };
   // Simple heuristics for reading/pos guessing (very basic)
   TinySegmenter.guessInfo=function(word){
-    if(!word)return null;
-    const info={surface:word,reading:'',romaji:'',pos:null,verb_type:null,origin:null,annotate:true,grammar_role:null,base_form:null};
-    // Check if it contains kanji
+    if(!word||word.length===0)return null;
     const hasKanji=/[\u4e00-\u9fff]/.test(word);
     const hasHira=/[\u3040-\u309f]/.test(word);
     const hasKata=/[\u30a0-\u30ff]/.test(word);
-    if(!hasKanji&&!hasKata){info.annotate=false;return info}
-    // If ends with する, likely サ変 verb
+    const isPunct=/^[、。，．・：；！？（）「」『』〔〕〈〉《》【】…‥\n\r\s]+$/.test(word);
+    if(isPunct||word.trim().length===0)return null;
+    if(!hasKanji&&!hasKata&&!hasHira)return null; // skip numbers/English/pure punct
+    const info={surface:word,reading:'',romaji:'',pos:null,verb_type:null,origin:null,annotate:!!(hasKanji||hasKata),grammar_role:null,base_form:null};
+    if(!info.annotate)return info; // hiragana-only words don't get annotated but still returned
     if(word.endsWith('する')){info.pos='動';info.verb_type='サ変';info.base_form=word}
-    else if(word.endsWith('ます')||word.endsWith('ません')){info.pos='動';info.verb_type='一段';info.base_form=word.slice(0,-2)+'る'}
-    else if(word.endsWith('た')||word.endsWith('だ')){info.pos='動';info.verb_type='五段';info.base_form=word.slice(0,-1)}
+    else if(hasKanji&&hasHira){info.pos='動・形'}
     else if(hasKanji){info.pos='名'}
     else if(hasKata){info.pos='外';info.origin='外来語'}
     return info;

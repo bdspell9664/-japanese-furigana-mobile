@@ -90,7 +90,7 @@ function renderStaticFeed(){
       <div class="art-meta"><span>${a.date}</span>${a.tags.map(t=>`<span class="art-tag">${t}</span>`).join('')}</div>
     </div>`).join('');
   dom.feedList.querySelectorAll('.article-card').forEach(c=>c.addEventListener('click',()=>{
-    dom.textInput.value=c.dataset.desc||'';dom.btnAnnotate.click();switchTab(1);
+    const d=c.dataset.desc;if(d){dom.textInput.value=d;dom.btnAnnotate.click();switchTab(1)}
   }));
 }
 async function fetchNHKFeed(){
@@ -111,7 +111,7 @@ async function fetchNHKFeed(){
           <div class="art-meta"><span>NHK</span></div>
         </div>`).join('');
       dom.feedList.querySelectorAll('.article-card').forEach(c=>c.addEventListener('click',()=>{
-        dom.urlInput.value=c.dataset.url;dom.btnFetch.click();switchTab(1);
+        const u=c.dataset.url;if(u){dom.urlInput.value=u;dom.btnFetch.click();switchTab(1)}
       }));
     }
   }catch(e){renderStaticFeed()}
@@ -146,16 +146,18 @@ async function doAnnotate(){
   const text=dom.textInput.value.trim();if(!text)return toast('请输入日文文本');
   if(!state.apiKey||!state.apiKey.startsWith('sk-'))return toast('请先设置API Key');
   state.text=text;dom.btnAnnotate.disabled=true;dom.btnAnnotate.textContent='解析中…';
-  dom.readingView.innerHTML='<div class="skeleton"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width:60%"></div></div>';
+  dom.readingView.innerHTML='<div class="skeleton"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div>';
   dom.analysisView.innerHTML='<div class="ana-empty">解析中…</div>';
+  // Force switch to reading tab
+  dom.readingPanel.classList.add('active');
+  [dom.discoverPanel,dom.analysisPanel,dom.savedPanel,dom.reviewPanel].forEach(p=>p.classList.remove('active'));
+  dom.dockBtns.forEach((b,i)=>b.classList.toggle('active',i===1));
   try{
     const lv=`N${state.jlptLevel}`,wg=state.layers.grammar||state.layers.segments;
-    // Use chunked annotation for long texts, with progressive rendering
     let result;
     if(text.length>400){
       let chunkCount=0;
       result=await JRApi.annotateChunked(text,lv,state.apiKey,wg,(done,total)=>{
-        chunkCount=done;
         dom.readingView.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px">已处理 ${done}/${total} 段…</div>`;
       });
     }else{
@@ -163,16 +165,19 @@ async function doAnnotate(){
     }
     // Parallel analyze
     const aRes=text.length<=1200?JRApi.analyze(text,state.apiKey):Promise.resolve(null);
-    if(result&&result.words){
+    if(result&&result.words&&result.words.length){
       dom.readingView.innerHTML=Renderer.render(text,result.words,result.structure,state.layers);
       bindWordTaps();addSpeakBtns();
       const n=result.words.filter(w=>w.annotate).length;toast(`标注 ${n} 词`);
     }else{
-      dom.readingView.innerHTML=`<div style="color:var(--accent);padding:10px">无标注结果</div>`;
+      dom.readingView.innerHTML=`<div style="font-size:13px;color:var(--accent);text-align:center;padding:20px;line-height:1.8">⚠️ 未识别到可标注词汇<br><span style="font-size:11px;color:var(--text3)">请确认输入了日文文本<br>或检查API Key是否有效</span></div>`;
     }
-    aRes.then(r=>{if(r){state.analysis=r;buildAnalysis(r)}}).catch(()=>{});
-  }catch(e){dom.readingView.innerHTML=`<div style="color:var(--accent);padding:10px">解析失败</div>`;toast('解析失败: '+e.message)}
-  finally{dom.btnAnnotate.disabled=false;dom.btnAnnotate.textContent='解析'}
+    aRes.then(r=>{if(r){state.analysis=r;buildAnalysis(r)}}).catch(e=>{console.warn('analyze:',e)});
+  }catch(e){
+    console.error('[doAnnotate]',e);
+    dom.readingView.innerHTML=`<div style="font-size:13px;color:var(--accent);text-align:center;padding:20px;line-height:1.8">解析失败：${e.message||'未知错误'}<br><span style="font-size:11px;color:var(--text3)">API: ${state.apiKey?.\slice(0,12)}…<br>若持续失败请检查设置中的API Key或网络</span></div>`;
+    toast('解析失败: '+(e.message||''));
+  }finally{dom.btnAnnotate.disabled=false;dom.btnAnnotate.textContent='解析'}
 }
 function addSpeakBtns(){
   dom.readingView.querySelectorAll('.rw-word').forEach(el=>{
